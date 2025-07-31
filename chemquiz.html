@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Quiz - Element Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        /* Chemical element particles */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 150px 150px, 200px 200px, 100px 100px;
+            animation: moleculeFloat 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes moleculeFloat {
+            0% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(20px) translateY(-30px); }
+            50% { transform: translateX(-10px) translateY(-60px); }
+            75% { transform: translateX(-30px) translateY(-30px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #f8fafc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6)); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 48px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .question-block {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .question-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .question-block:hover::before {
+            left: 100%;
+        }
+
+        .question-block:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-label {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: block;
+            line-height: 1.6;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-right: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            position: relative;
+        }
+
+        .question-number::after {
+            content: '⚗️';
+            position: absolute;
+            right: -8px;
+            top: -8px;
+            font-size: 16px;
+            animation: bubble 2s ease-in-out infinite;
+        }
+
+        @keyframes bubble {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.1) translateY(-2px); }
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            background: #f9fafb;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .answer-input:focus {
+            border-color: #ff6b6b;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .answer-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: 400;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hint-container {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin-top: 12px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.4s ease;
+        }
+
+        .hint-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hint-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #92400e;
+            text-align: center;
+        }
+
+        .feedback {
+            margin-top: 12px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #047857;
+            border: 2px solid #10b981;
+        }
+
+        .feedback.wrong {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+            border: 2px solid #ef4444;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 32px 0;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.4);
+        }
+
+        .result-container {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 24px;
+            border-radius: 20px;
+            border: 2px solid #bae6fd;
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .result-container:hover::before {
+            left: 100%;
+        }
+
+        .result-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #0369a1;
+            animation: scoreGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes scoreGlow {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .quiz-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0369a1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #0369a1;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Success celebration particles */
+        .celebration {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: particleBurst 2s ease-out forwards;
+        }
+
+        @keyframes particleBurst {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) translateY(-200px);
+            }
+        }
+
+        /* Chemical element animation */
+        .element-float {
+            position: absolute;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+            animation: elementDrift 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes elementDrift {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            25% { transform: translateY(-30px) rotate(90deg); opacity: 0.6; }
+            50% { transform: translateY(-60px) rotate(180deg); opacity: 0.3; }
+            75% { transform: translateY(-30px) rotate(270deg); opacity: 0.6; }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .game-container {
+                padding: 32px 24px;
+                margin: 20px;
+            }
+
+            .question-block {
+                padding: 24px;
+            }
+
+            .buttons-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .quiz-stats {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .game-container {
+                padding: 24px 16px;
+            }
+
+            .question-block {
+                padding: 20px;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            .quiz-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating chemical elements -->
+    <div class="element-float" style="top: 10%; left: 5%; animation-delay: 0s;">H</div>
+    <div class="element-float" style="top: 20%; right: 10%; animation-delay: 1s;">O</div>
+    <div class="element-float" style="top: 70%; left: 8%; animation-delay: 2s;">C</div>
+    <div class="element-float" style="top: 80%; right: 15%; animation-delay: 3s;">N</div>
+    <div class="element-float" style="top: 30%; left: 90%; animation-delay: 4s;">Au</div>
+    <div class="element-float" style="top: 60%; left: 2%; animation-delay: 5s;">Fe</div>
+
+    <div class="header">
+        <h1>⚗️ Chemistry Quiz</h1>
+        <p class="subtitle">Test Your Knowledge of Elements and Compounds</p>
+    </div>
+
+    <div class="game-container">
+        <div style="text-align:right; margin-bottom:16px;">
+            <button class="btn btn-secondary" type="button" onclick="returnToMenu()">⬅️ Return to Quiz Menu</button>
+        </div>
+        <form id="quizForm"></form>
+        
+        <div class="buttons-container">
+            <button type="button" class="btn btn-primary" onclick="checkAnswers()">
+                ✅ Submit Quiz
+            </button>
+            <button type="button" class="btn btn-info" onclick="toggleHints()">
+                💡 Toggle Hints
+            </button>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <div id="result" class="result-container" style="display: none;">
+            <div class="result-text"></div>
+        </div>
+
+        <div class="quiz-stats">
+            <div class="stat-card">
+                <span class="stat-value" id="questionsCount">5</span>
+                <div class="stat-label">Questions</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="currentScore">0</span>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="progressPercent">0%</span>
+                <div class="stat-label">Progress</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "What is the chemical symbol for Gold?", a: "au", hint: "Precious metal, starts with 'A'" },
+            { q: "What is the pH of pure water?", a: "7", hint: "Neutral pH value" },
+            { q: "Which gas is required for combustion?", a: "oxygen", hint: "Essential for breathing" },
+            { q: "What is the lightest element?", a: "hydrogen", hint: "First element in periodic table" },
+            { q: "Which acid is found in lemons?", a: "citric acid", hint: "Found in citrus fruits" },
+            { q: "What is the chemical formula for water?", a: "h2o", hint: "Two hydrogen, one oxygen" },
+            { q: "Which element has the atomic number 6?", a: "carbon", hint: "Found in all organic compounds" },
+            { q: "What gas do plants absorb from the atmosphere?", a: "carbon dioxide", hint: "CO₂, used in photosynthesis" },
+            { q: "What is the most abundant gas in the Earth's atmosphere?", a: "nitrogen", hint: "Makes up about 78% of air" },
+            { q: "What is NaCl commonly known as?", a: "salt", hint: "Common table seasoning" },
+            { q: "Which metal is liquid at room temperature?", a: "mercury", hint: "Used in old thermometers" },
+            { q: "What type of bond involves sharing of electrons?", a: "covalent", hint: "Not ionic bond" },
+            { q: "What is the chemical symbol for Iron?", a: "fe", hint: "From Latin 'ferrum'" },
+            { q: "Which acid is found in the stomach?", a: "hydrochloric acid", hint: "HCl, helps digest food" },
+            { q: "What is the chemical formula for methane?", a: "ch4", hint: "Natural gas, one carbon four hydrogen" },
+            { q: "What is the atomic number of oxygen?", a: "8", hint: "Number of protons in oxygen" },
+            { q: "What is the symbol for Potassium?", a: "k", hint: "From Latin 'kalium'" },
+            { q: "Which gas is known as laughing gas?", a: "nitrous oxide", hint: "N₂O, used as anesthetic" },
+            { q: "What is the chemical name of rust?", a: "iron oxide", hint: "Iron + oxygen reaction" },
+            { q: "Which element is used in light bulb filaments?", a: "tungsten", hint: "High melting point metal" }
+        ];
+
+        const selected = questions.sort(() => Math.random() - 0.5).slice(0, 5);
+        const form = document.getElementById("quizForm");
+        let answered = 0;
+        let hintsVisible = false;
+
+        // Generate quiz questions with modern styling
+        selected.forEach((item, index) => {
+            const block = document.createElement("div");
+            block.className = "question-block";
+            block.innerHTML = `
+                <label class="question-label">
+                    <span class="question-number">Q${index + 1}</span>
+                    ${item.q}
+                </label>
+                <input 
+                    type="text" 
+                    id="ans${index}" 
+                    class="answer-input"
+                    placeholder="Enter your answer here..."
+                    oninput="updateProgress()"
+                    autocomplete="off"
+                >
+                <div class="hint-container" id="hint${index}" style="display: none;">
+                    <div class="hint-text">💡 Hint: ${item.hint}</div>
+                </div>
+                <div id="feedback${index}" class="feedback"></div>
+            `;
+            form.appendChild(block);
+        });
+
+        function updateProgress() {
+            const inputs = document.querySelectorAll('.answer-input');
+            answered = 0;
+            inputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    answered++;
+                }
+            });
+            
+            const progress = (answered / selected.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressPercent').innerText = Math.round(progress) + '%';
+        }
+
+        function showFeedback(element, message, type) {
+            element.innerText = message;
+            element.className = `feedback ${type} show`;
+        }
+
+        function toggleHints() {
+            hintsVisible = !hintsVisible;
+            const hintContainers = document.querySelectorAll('.hint-container');
+            const hintButton = document.querySelector('.btn-info');
+            
+            hintContainers.forEach(container => {
+                if (hintsVisible) {
+                    container.style.display = 'block';
+                    setTimeout(() => {
+                        container.classList.add('show');
+                    }, 100);
+                } else {
+                    container.classList.remove('show');
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                    }, 400);
+                }
+            });
+            
+            // Update button text
+            hintButton.innerHTML = hintsVisible ? '🙈 Hide Hints' : '💡 Show Hints';
+        }
+
+        function createCelebrationEffect() {
+            const colors = ['#10b981', '#ff6b6b', '#4ecdc4', '#45b7d1', '#ffeaa7'];
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = '50%';
+                particle.style.top = '50%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                const angle = (i * 24) * (Math.PI / 180);
+                const velocity = 50 + Math.random() * 40;
+                const deltaX = Math.cos(angle) * velocity;
+                const deltaY = Math.sin(angle) * velocity;
+                
+                particle.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 2000);
+            }
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            let allFilled = true;
+
+            selected.forEach((item, index) => {
+                const userInput = document.getElementById(`ans${index}`).value.trim().toLowerCase();
+                const correctAnswer = item.a.toLowerCase();
+                const feedback = document.getElementById(`feedback${index}`);
+
+                if (userInput === "") {
+                    showFeedback(feedback, "⚠️ Please enter an answer.", "wrong");
+                    allFilled = false;
+                } else if (userInput === correctAnswer) {
+                    showFeedback(feedback, "🎉 Correct! Great chemistry knowledge!", "correct");
+                    score=score+10;
+                } else {
+                    showFeedback(feedback, `❌ Wrong! Correct answer: ${item.a}`, "wrong");
+                }
+            });
+
+            // Update current score display
+            document.getElementById('currentScore').innerText = score;
+
+            // Show result
+            const resultContainer = document.getElementById("result");
+            const resultText = resultContainer.querySelector('.result-text');
+            
+            if (allFilled) {
+                const percentage = (score / 5) * 100;
+                let message = "";
+                
+                if (percentage >= 80) {
+                    message = `🧪 Chemistry Master! Your Score: ${score} / 5 (${percentage}%)`;
+                    createCelebrationEffect();
+                } else if (percentage >= 60) {
+                    message = `⚗️ Great Knowledge! Your Score: ${score} / 5 (${percentage}%)`;
+                } else {
+                    message = `🔬 Keep Studying! Your Score: ${score} / 5 (${percentage}%)`;
+                }
+                
+                resultText.innerText = message;
+                resultContainer.style.display = 'block';
+                
+                // Smooth scroll to result
+                setTimeout(() => {
+                    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
+
+                // Store score in memory for potential use
+                if (!window.gameData) {
+                    window.gameData = { games: {} };
+                }
+                window.gameData.games = window.gameData.games || {};
+                window.gameData.games["Chemistry Quiz"] = score;
+                
+            } else {
+                resultText.innerText = "⚠️ Please answer all questions before submitting.";
+                resultContainer.style.display = 'block';
+            }
+        }
+
+        function openHintPage() {
+            const score = parseInt(document.getElementById('currentScore').innerText) || 0;
+            
+            // Store current score
+            if (!window.gameData) {
+                window.gameData = { games: {} };
+            }
+            window.gameData.games = window.gameData.games || {};
+            window.gameData.games["Chemistry Quiz"] = score;
+            
+            // Show navigation message
+            const resultContainer = document.getElementById("result");
+            const resultText = resultContainer.querySelector('.result-text');
+            resultText.innerText = "🧪 Opening hints page... Get ready for chemistry clues!";
+            resultContainer.style.display = 'block';
+            
+            setTimeout(() => {
+                // In a real application, this would navigate to hint789.html
+                alert("Would navigate to hint789.html - Chemistry Hints Page");
+            }, 2000);
+        }
+
+        function returnToMenu() {
+            // Get the score from the currentScore element
+            const score = parseInt(document.getElementById('currentScore').innerText) || 0;
+            let games = JSON.parse(sessionStorage.getItem("games")) || {};
+            games["Chemistry Quiz"] = score;
+            sessionStorage.setItem("games", JSON.stringify(games));
+            window.location.href = "index.html";
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                checkAnswers();
+            }
+        });
+
+        // Initialize progress
+        updateProgress();
+
+        // Add periodic table elements animation
+        function addFloatingElements() {
+            const elements = ['H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca'];
+            
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const element = document.createElement('div');
+                    element.className = 'element-float';
+                    element.innerText = elements[Math.floor(Math.random() * elements.length)];
+                    element.style.left = Math.random() * 100 + '%';
+                    element.style.top = '100%';
+                    element.style.animationDuration = (3 + Math.random() * 4) + 's';
+                    
+                    document.body.appendChild(element);
+                    
+                    setTimeout(() => {
+                        if (element.parentNode) {
+                            element.remove();
+                        }
+                    }, 8000);
+                }
+            }, 3000);
+        }
+
+        // Start floating elements animation
+        addFloatingElements();
+
+        // Add smooth input animations
+        document.querySelectorAll('.answer-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add typing sound effect (visual feedback)
+        document.querySelectorAll('.answer-input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.style.borderColor = '#ff6b6b';
+                setTimeout(() => {
+                    if (this.value.trim() === '') {
+                        this.style.borderColor = '#e5e7eb';
+                    }
+                }, 300);
+            });
+        });
+    </script>
+
+</body>
+</html>

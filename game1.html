@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechMoji - Tech Emoji Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            animation: float 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(10px) rotate(240deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #f8fafc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); }
+            to { filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6)); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .difficulty-selector {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 16px 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .difficulty-selector:hover {
+            transform: translateY(-2px);
+        }
+
+        .difficulty-label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .difficulty-select {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            font-size: 16px;
+            font-weight: 500;
+            color: #374151;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 48px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899, #f59e0b);
+            animation: rainbow 3s linear infinite;
+        }
+
+        @keyframes rainbow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .emoji-display {
+            font-size: 4rem;
+            margin: 32px 0;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .emoji-display::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6, #ec4899, #f59e0b);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .emoji-display:hover::after {
+            opacity: 1;
+        }
+
+        .input-container {
+            position: relative;
+            margin: 24px 0;
+        }
+
+        .guess-input {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            background: #f9fafb;
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .guess-input:focus {
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .guess-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+            grid-column: 1 / -1;
+            margin-top: 16px;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #bae6fd;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .info-card:hover::before {
+            left: 100%;
+        }
+
+        .info-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0369a1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: #0369a1;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .timer-card {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-color: #f59e0b;
+            grid-column: 1 / -1;
+        }
+
+        .timer-card .info-value {
+            color: #92400e;
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        .timer-card .info-label {
+            color: #92400e;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .timer-warning .info-value {
+            color: #dc2626 !important;
+            animation: urgentPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes urgentPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #047857;
+            border: 2px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #dc2626;
+            border: 2px solid #ef4444;
+        }
+
+        .hint {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #166534;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-style: italic;
+            font-weight: 500;
+            margin: 16px 0;
+            border: 1px solid #bbf7d0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .hint.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .game-container {
+                padding: 32px 24px;
+                margin: 20px;
+            }
+
+            .emoji-display {
+                font-size: 3rem;
+                margin: 24px 0;
+                padding: 20px;
+            }
+
+            .difficulty-selector {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .buttons-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .timer-card {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .game-container {
+                padding: 24px 16px;
+            }
+
+            .emoji-display {
+                font-size: 2.5rem;
+                padding: 16px;
+            }
+
+            .guess-input {
+                padding: 14px 16px;
+                font-size: 16px;
+            }
+
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 TechMoji</h1>
+        <p class="subtitle">Decode the Tech World Through Emojis</p>
+    </div>
+
+    <div class="difficulty-selector">
+        <label class="difficulty-label" for="level">🎚️ Difficulty Level:</label>
+        <select id="level" class="difficulty-select" onchange="changeLevel()">
+            <option value="medium">🎯 Medium Challenge</option>
+            <option value="hard">🔥 Hard Mode</option>
+        </select>
+    </div>
+
+    <div class="game-container">
+        <div style="text-align:right; margin-bottom:16px;">
+            <button class="btn btn-secondary" type="button" onclick="returnToMenu()">⬅️ Return to Quiz Menu</button>
+        </div>
+        <div id="emoji-display" class="emoji-display"></div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="guess" 
+                class="guess-input" 
+                placeholder="What tech concept do these emojis represent?" 
+                onkeydown="if(event.key==='Enter') checkGuess()"
+                autocomplete="off"
+            >
+        </div>
+
+        <div class="buttons-container">
+            <button class="btn btn-primary" onclick="checkGuess()">
+                ✅ Submit Answer
+            </button>
+            <button class="btn btn-secondary" onclick="showHint()">
+                💡 Get Hint
+            </button>
+            <button class="btn btn-danger" onclick="finishGame()">
+                🏁 Finish Game
+            </button>
+        </div>
+
+        <div id="hint" class="hint"></div>
+        <div id="result" class="feedback"></div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <span class="info-value" id="score">0</span>
+                <div class="info-label">Score</div>
+            </div>
+            <div class="info-card">
+                <span class="info-value" id="level-display">Medium</span>
+                <div class="info-label">Level</div>
+            </div>
+            <div class="info-card timer-card" id="timer-card">
+                <span class="info-value" id="timer">30</span>
+                <div class="info-label">Seconds Left</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const levels = {
+            medium: [
+                { emoji: "❌🍽️📄", answer: "Cross Platform" },
+                { emoji: "💻🧑‍🏫", answer: "Machine Learning" },
+                { emoji: "☁️💻", answer: "Cloud Computing" },
+                { emoji: "📦🔗", answer: "Blockchain" },
+                { emoji: "📊🔒", answer: "Data Encryption" },
+                { emoji: "🧠🔗🛜", answer: "Neural Network" },
+                { emoji: "⏪⬆🔃✅", answer: "Backup Processing" },
+                { emoji: "🥽🧠", answer: "Virtual Reality" },
+                { emoji: "🔥🧱", answer: "Firewall" }
+            ],
+            hard: [
+                { emoji: "🗂️📤", answer: "File Upload" },
+                { emoji: "🛜🔒", answer: "Internet Security" },
+                { emoji: "⚛💻", answer: "Quantum Computing" },
+                { emoji: "📱⬆️📅", answer: "App Update" },
+                { emoji: "👨‍⚕💻", answer: "Operating System" },
+                { emoji: "🐛🔍", answer: "Debugging" },
+                { emoji: "🦠🛡️", answer: "Antivirus" },
+                { emoji: "🖼️🔍", answer: "Image Search" },
+                { emoji: "🕸️🏗️🚀", answer: "Website Launch" },
+                { emoji: "🎤📝", answer: "Voice Recognition" }
+            ]
+        };
+
+        let currentLevel = "medium";
+        let score = 0;
+        let lastEmoji = "";
+        let timer;
+        let timeLeft = 30;
+        let currentQuestion = null;
+
+        function getRandomQuestion() {
+            let question;
+            do {
+                question = levels[currentLevel][Math.floor(Math.random() * levels[currentLevel].length)];
+            } while (question.emoji === lastEmoji);
+            lastEmoji = question.emoji;
+            return question;
+        }
+
+        function loadQuestion() {
+            currentQuestion = getRandomQuestion();
+            const emojiDisplay = document.getElementById("emoji-display");
+            
+            // Add loading animation
+            emojiDisplay.innerHTML = '<div class="loading"></div>';
+            
+            setTimeout(() => {
+                emojiDisplay.innerText = currentQuestion.emoji;
+                emojiDisplay.dataset.answer = currentQuestion.answer;
+            }, 500);
+
+            document.getElementById("guess").value = "";
+            hideResult();
+            hideHint();
+            resetTimer();
+            
+            // Focus on input for better UX
+            setTimeout(() => {
+                document.getElementById("guess").focus();
+            }, 600);
+        }
+
+        function checkGuess() {
+            clearInterval(timer);
+            const userGuess = document.getElementById("guess").value.trim();
+            const correctAnswer = currentQuestion.answer.trim();
+            const resultDisplay = document.getElementById("result");
+
+            if (userGuess.toLowerCase() === correctAnswer.toLowerCase()) {
+                score += 10;
+                showResult("🎉 Correct! Well done!", "correct");
+                
+                // Celebrate with a brief animation
+                document.getElementById("emoji-display").style.animation = "pulse 0.5s ease-in-out 3";
+            } else {
+                showResult(`❌ Wrong! The answer was: ${correctAnswer}`, "incorrect");
+            }
+
+            document.getElementById("score").innerText = score;
+
+            setTimeout(() => {
+                loadQuestion();
+            }, 3000);
+        }
+
+        function showResult(message, type) {
+            const resultDisplay = document.getElementById("result");
+            resultDisplay.innerText = message;
+            resultDisplay.className = `feedback ${type} show`;
+        }
+
+        function hideResult() {
+            const resultDisplay = document.getElementById("result");
+            resultDisplay.className = "feedback";
+        }
+
+        function changeLevel() {
+            const levelSelect = document.getElementById("level");
+            currentLevel = levelSelect.value;
+            
+            // Update level display
+            const levelDisplay = document.getElementById("level-display");
+            levelDisplay.innerText = currentLevel.charAt(0).toUpperCase() + currentLevel.slice(1);
+            
+            // Reset score when changing level
+            score = 0;
+            document.getElementById("score").innerText = score;
+            
+            loadQuestion();
+        }
+
+        function showHint() {
+            const answer = currentQuestion.answer;
+            const hintLetter = answer.charAt(0).toUpperCase();
+            const hintDisplay = document.getElementById("hint");
+            hintDisplay.innerText = `💡 Hint: Starts with "${hintLetter}" and has ${answer.length} characters`;
+            hintDisplay.classList.add("show");
+        }
+
+        function hideHint() {
+            const hintDisplay = document.getElementById("hint");
+            hintDisplay.classList.remove("show");
+        }
+
+        function finishGame() {
+            clearInterval(timer);
+            
+            // Store score in memory instead of sessionStorage
+            if (!window.gameData) {
+                window.gameData = { games: {} };
+            }
+            window.gameData.games["TechMoji Game"] = score;
+            
+            // Show completion message
+            const message = score >= 50 ? 
+                `🏆 Excellent! Final Score: ${score}` : 
+                score >= 20 ? 
+                `👍 Good job! Final Score: ${score}` : 
+                `💪 Keep practicing! Final Score: ${score}`;
+            
+            showResult(`${message}. Returning to portal...`, score >= 20 ? "correct" : "incorrect");
+            
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 3000);
+        }
+
+        function returnToMenu() {
+            // Get the score from the score element
+            const score = parseInt(document.getElementById('score').innerText) || 0;
+            let games = JSON.parse(sessionStorage.getItem("games")) || {};
+            games["TechMoji Game"] = score;
+            sessionStorage.setItem("games", JSON.stringify(games));
+            window.location.href = "index.html";
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            const timerDisplay = document.getElementById("timer");
+            const timerCard = document.getElementById("timer-card");
+            
+            timerDisplay.innerText = timeLeft;
+            timerCard.classList.remove("timer-warning");
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+
+                // Add warning style when time is running low
+                if (timeLeft <= 10) {
+                    timerCard.classList.add("timer-warning");
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    const correctAnswer = currentQuestion.answer.trim();
+                    showResult(`⏰ Time's up! The answer was: ${correctAnswer}`, "incorrect");
+
+                    setTimeout(() => {
+                        loadQuestion();
+                    }, 3000);
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            startTimer();
+        }
+
+        // Initialize game
+        function initGame() {
+            // Update level display
+            document.getElementById("level-display").innerText = "Medium";
+            
+            // Load first question
+            loadQuestion();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'h' || event.key === 'H') {
+                    if (event.ctrlKey || event.metaKey) {
+                        event.preventDefault();
+                        showHint();
+                    }
+                } else if (event.key === 'Escape') {
+                    hideHint();
+                    hideResult();
+                }
+            });
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>

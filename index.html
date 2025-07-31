@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        #loginForm {
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        #welcomeMessage {
+            display: none;
+        }
+
+        .user-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            text-align: center;
+            border: 1px solid #bae6fd;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0369a1;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6366f1;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .games-progress {
+            margin: 24px 0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '🎮';
+            font-size: 1.5rem;
+        }
+
+        #gameList {
+            list-style: none;
+            display: grid;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        #gameList li {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+            transition: transform 0.2s ease;
+        }
+
+        #gameList li:hover {
+            transform: translateX(4px);
+        }
+
+        .age-group {
+            margin-bottom: 32px;
+        }
+
+        .age-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4f46e5;
+            margin-bottom: 16px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid #c7d2fe;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .game-btn {
+            padding: 16px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-btn:hover::before {
+            left: 100%;
+        }
+
+        .game-btn:hover {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 24px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 24px 20px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+            
+            .game-btn {
+                padding: 12px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Game Portal</h1>
+            <p>Your gateway to fun and learning</p>
+            <button class="logout-btn" onclick="logout()" id="logoutBtn" style="display: none;">Logout</button>
+        </div>
+        
+        <div class="content">
+            <div id="loginForm">
+                <div class="form-group">
+                    <h2 style="color: #374151; margin-bottom: 24px; font-size: 1.75rem; font-weight: 600;">Who's Playing Today?</h2>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" placeholder="Enter your name" />
+                    </div>
+                    <button class="btn btn-primary" onclick="saveUsername()">Let's Play!</button>
+                </div>
+            </div>
+
+            <div id="welcomeMessage">
+                <div class="user-info">
+                    <h2 class="welcome-title">Welcome back, <span id="displayName"></span>! 👋</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-value" id="gamesPlayed">0</span>
+                            <div class="stat-label">Games Played</div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value" id="netScore">0</span>
+                            <div class="stat-label">Total Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="games-progress">
+                    <div class="section-title">Your Game Progress</div>
+                    <ul id="gameList"></ul>
+                </div>
+
+                <div class="age-group">
+                    <div class="age-title">🌟 Age 3-6: Early Learning</div>
+                    <div class="games-grid">
+                        <button class="game-btn" onclick="window.location.href='fruitquiz.html'">🍎 Nursery Fruit Quiz</button>
+                        <button class="game-btn" onclick="window.location.href='alphabetquiz.html'">🔤 Alphabet Quiz (Special Needs)</button>
+                        <button class="game-btn" onclick="window.location.href='deaf and dumb quiz.html'">👐 Sign Language Quiz</button>
+                    </div>
+                </div>
+
+                <div class="age-group">
+                    <div class="age-title">🎯 Age 8-12: Skill Building</div>
+                    <div class="games-grid">
+                        <button class="game-btn" onclick="window.location.href='game6.html'">🧠 Memory Card Game</button>
+                        <button class="game-btn" onclick="window.location.href='game3.html'">💭 Memorize</button>
+                        <button class="game-btn" onclick="window.location.href='game2.html'">✏️ Fill If You Can!</button>
+                        <button class="game-btn" onclick="window.location.href='game7.html'">🔀 Scrambled Word</button>
+                        <button class="game-btn" onclick="window.location.href='countryquiz.html'">🌍 Country Capital Quiz</button>
+                    </div>
+                </div>
+
+                <div class="age-group">
+                    <div class="age-title">🧩 Age 12-15: Challenge Zone</div>
+                    <div class="games-grid">
+                        <button class="game-btn" onclick="window.location.href='game4.html'">🔢 Sudoku</button>
+                        <button class="game-btn" onclick="window.location.href='game5.html'">🔍 Guess The Sequence!</button>
+                        <button class="game-btn" onclick="window.location.href='game8.html'">🌈 Stroop Test</button>
+                    </div>
+                </div>
+
+                <div class="age-group">
+                    <div class="age-title">🚀 Age 16+: Advanced Play</div>
+                    <div class="games-grid">
+                        <button class="game-btn" onclick="window.location.href='game1.html'">💻 TechMoji</button>
+                        <button class="game-btn" onclick="window.location.href='pythonquiz.html'">🐍 Python Quiz</button>
+                        <button class="game-btn" onclick="window.location.href='chemquiz.html'">🧪 Chemistry Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+
+    <script>
+        function saveUsername() {
+            let username = document.getElementById("username").value;
+            if (username.trim() !== "") {
+                // Store data in memory instead of sessionStorage
+                window.gameData = {
+                    username: username,
+                    games: {}
+                };
+                // After successful login
+                sessionStorage.setItem("username", username);
+                showWelcome();
+            } else {
+                alert("Please enter a valid name.");
+            }
+        }
+
+        function calculateNetScore() {
+            // Try to load scores from sessionStorage
+            let games = {};
+            try {
+                games = JSON.parse(sessionStorage.getItem("games")) || {};
+            } catch {}
+            // Also merge with in-memory scores if any
+            if (window.gameData?.games) {
+                games = { ...games, ...window.gameData.games };
+            }
+            window.gameData = window.gameData || {};
+            window.gameData.games = games;
+
+            let totalScore = Object.values(games).reduce((sum, score) => sum + score, 0);
+            let gamesCount = Object.keys(games).length;
+            document.getElementById("netScore").innerText = totalScore;
+            document.getElementById("gamesPlayed").innerText = gamesCount;
+        }
+
+        function displayGames() {
+            let gameList = document.getElementById("gameList");
+            gameList.innerHTML = "";
+            let games = {};
+            try {
+                games = JSON.parse(sessionStorage.getItem("games")) || {};
+            } catch {}
+            // Merge with in-memory
+            if (window.gameData?.games) {
+                games = { ...games, ...window.gameData.games };
+            }
+            window.gameData = window.gameData || {};
+            window.gameData.games = games;
+
+            if (Object.keys(games).length === 0) {
+                let emptyMessage = document.createElement("li");
+                emptyMessage.textContent = "No games played yet. Start your journey!";
+                emptyMessage.style.background = "linear-gradient(135deg, #f3f4f6, #e5e7eb)";
+                emptyMessage.style.color = "#6b7280";
+                emptyMessage.style.borderLeft = "4px solid #9ca3af";
+                gameList.appendChild(emptyMessage);
+            } else {
+                for (let game in games) {
+                    let listItem = document.createElement("li");
+                    listItem.textContent = `${game}: ${games[game]} points`;
+                    gameList.appendChild(listItem);
+                }
+            }
+        }
+
+        function showWelcome() {
+            let username = window.gameData?.username;
+            if (username) {
+                document.getElementById("displayName").innerText = username;
+                document.getElementById("loginForm").style.display = "none";
+                document.getElementById("welcomeMessage").style.display = "block";
+                document.getElementById("logoutBtn").style.display = "block";
+                displayGames();
+                calculateNetScore();
+            }
+        }
+
+        function logout() {
+            window.gameData = null;
+            document.getElementById("loginForm").style.display = "block";
+            document.getElementById("welcomeMessage").style.display = "none";
+            document.getElementById("logoutBtn").style.display = "none";
+            document.getElementById("username").value = "";
+        }
+
+        // Check if user data exists on load
+        window.onload = function() {
+            if (window.gameData?.username) {
+                showWelcome();
+            }
+        };
+
+        // Auto-login if username is in sessionStorage
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedUsername = sessionStorage.getItem("username");
+            if (savedUsername) {
+                window.gameData = window.gameData || {};
+                window.gameData.username = savedUsername;
+                window.gameData.games = JSON.parse(sessionStorage.getItem("games")) || {};
+                showWelcome();
+            }
+        });
+    </script>
+</body>
+</html>
